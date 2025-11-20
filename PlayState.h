@@ -1,24 +1,28 @@
-#ifndef PLAYSTATE_H
-#define PLAYSTATE_H
-
+#pragma once
 #include "State.h"
-#include <SFML/Graphics.hpp>
+#include <vector>
 
-class PlayState : public State {
-private:
-    sf::Font font;
-    sf::Text label;
-
-public:
-    PlayState(Game* game);
-    ~PlayState() override;
-
-    void onEnter() override {}
-    void onExit() override {}
-
-    void handleInput(sf::Event& event) override;
-    void update(float dt) override {}
-    void render(sf::RenderWindow& window) override;
+struct Spell {
+    sf::CircleShape shape;
+    sf::Vector2f pos, vel;
+    int damage, owner;
 };
 
-#endif
+class Player; // forward
+
+class PlayState : public State {
+public:
+    PlayState(Game* game);
+    void handleEvent(sf::Event& event) override;
+    void update(float dt) override;
+    void render(sf::RenderWindow& window) override;
+
+private:
+    Player p1, p2;
+    std::vector<Spell> spells;
+    sf::Font font;
+    sf::Text winnerText;
+    bool gameOver = false;
+
+    void castSpell(Player& caster);
+};

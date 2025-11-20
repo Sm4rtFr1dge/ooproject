@@ -2,27 +2,36 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
-
-class State; // Forward declaration
+#include <vector>
+#include "Player.h"
+#include "CollisionManager.h"
+#include "ShockManager.cpp"
+#include "Platform.h"
 
 class Game {
 private:
     sf::RenderWindow window;
-    State* currentState;
-    State* nextState;
-    bool running = true;
+    Player* player1;
+    Player* player2;
+    CollisionManager collisionManager;
+    ShockManager shockManager;
+    
+    sf::Texture platformTexture;
+    std::vector<Platform> platforms;
+
+    sf::Texture bgTexture;
+    sf::Sprite bgSprite;
+
+    void processEvents();
+    void update(sf::Time dt);
+    void draw();
+    void drawHUD(); // New Function for Top-of-screen bars
+    void checkVictory();
 
 public:
     Game();
     ~Game();
-
     void run();
-    void changeState(State* newState);
-    void queueStateChange(State* newState);
-
-    sf::RenderWindow& getWindow() { return window; }
-    bool isRunning() const { return running; }
-    void quit() { running = false; }
 };
 
 #endif
