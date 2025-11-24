@@ -2,27 +2,68 @@
 #define GAME_H
 
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include "Player.h"
+#include "CollisionManager.h"
+#include "ShockManager.cpp"
+#include "Platform.h"
 
-class State; // Forward declaration
+// Define Game States
+enum GameState {
+    STATE_MENU,
+    STATE_CONTROLS,
+    STATE_PLAYING,
+    STATE_GAME_OVER
+};
 
 class Game {
 private:
     sf::RenderWindow window;
-    State* currentState;
-    State* nextState;
-    bool running = true;
+    Player* player1;
+    Player* player2;
+    CollisionManager collisionManager;
+    ShockManager shockManager;
+    
+    sf::Texture platformTexture;
+    std::vector<Platform> platforms;
+
+    sf::Texture bgTexture;
+    sf::Sprite bgSprite;
+
+    // --- UI / STATE VARIABLES ---
+    GameState currentState;
+    sf::Font font;
+
+    // Menu Elements
+    sf::Text titleText;
+    sf::Text startButton;
+    sf::Text controlsButton;
+    sf::Text exitButton;
+
+    // Controls Elements
+    sf::Text controlsTitle;
+    sf::Text controlsContent; // The big block of text
+    sf::Text backButton;
+
+    // Helpers
+    void initUI();
+    void processEvents();
+    void update(sf::Time dt);
+    void draw();
+    
+    // Specific Drawers
+    void drawMenu();
+    void drawControls();
+    void drawHUD(); 
+    void drawGame();
+
+    void checkVictory();
+    void resetGame(); // Helper to restart
 
 public:
     Game();
     ~Game();
-
     void run();
-    void changeState(State* newState);
-    void queueStateChange(State* newState);
-
-    sf::RenderWindow& getWindow() { return window; }
-    bool isRunning() const { return running; }
-    void quit() { running = false; }
 };
 
 #endif
