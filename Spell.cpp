@@ -11,7 +11,7 @@ Spell::Spell(float startX, float startY, sf::Vector2f dir, sf::Color color, floa
     damage = dmg;
     effectType = effect;
     active = true;
-    lifetime = 3.0f; // Spells last 10 seconds before disappearing naturally
+    lifetime = 3.0f; // Spells last 3 seconds before disappearing naturally
 }
 
 void Spell::update(sf::Time dt) {
@@ -24,10 +24,23 @@ void Spell::update(sf::Time dt) {
     sf::Vector2f pos = shape.getPosition();
     bool wrapped = false;
 
-    if (pos.x < 0) { pos.x = 800.f; wrapped = true; }
-    if (pos.x > 800) { pos.x = 0.f; wrapped = true; }
-    if (pos.y < 0) { pos.y = 600.f; wrapped = true; }
-    if (pos.y > 600) { pos.y = 0.f; wrapped = true; }
+    if (pos.x < 0) { 
+        pos.x = 800.f; 
+        wrapped = true; 
+    }
+
+    if (pos.x > 800) {pos.x = 0.f; 
+        wrapped = true; 
+    }
+    if (pos.y < 0) { 
+        pos.y = 600.f; 
+        wrapped = true; 
+    }
+
+    if (pos.y > 600) { 
+        pos.y = 0.f; 
+        wrapped = true; 
+    }
 
     if (wrapped) {
         shape.setPosition(pos);

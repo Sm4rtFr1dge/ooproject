@@ -48,6 +48,7 @@ public:
     float getMP() const;
     float getMaxMP() const;
     float getShieldHP() const;
+    int getPlayerId() const;
 
     void setPosition(float x, float y);
     sf::Vector2f getPosition() const;

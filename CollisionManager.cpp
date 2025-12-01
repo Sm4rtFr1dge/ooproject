@@ -10,8 +10,8 @@ bool CollisionManager::checkHits(Player* attacker, Player* victim) {
             if (spell.getBounds().intersects(victim->getBounds())) {
                 // 1. Deal Damage
                 victim->takeDamage(spell.getDamage());
-                
-                // 2. Apply Status Effect (NEW)
+
+                // 2. Apply Status Effect
                 victim->applyStatusEffect(spell.getEffect());
 
                 spell.deactivate();
@@ -29,16 +29,32 @@ void CollisionManager::checkEnvironment(Player* player, const std::vector<Platfo
         if (playerBounds.intersects(platform.getBounds())) {
             sf::Vector2f pPos = player->getPosition();
             sf::FloatRect wall = platform.getBounds();
-            float wallCenterY = wall.top + wall.height/2;
-            float wallCenterX = wall.left + wall.width/2;
-
+            
+            float wallCenterY = wall.top + wall.height / 2;
+            float wallCenterX = wall.left + wall.width / 2;
             float dx = pPos.x - wallCenterX;
             float dy = pPos.y - wallCenterY;
-            
-            if (std::abs(dx) > std::abs(dy)) {
-                player->setPosition(pPos.x + (dx > 0 ? 2.0f : -2.0f), pPos.y);
+
+            // --- FIX FOR SLIDING FLOORS ---
+            // Calculate overlap amounts
+            float overlapX = (playerBounds.width/2 + wall.width/2) - std::abs(dx);
+            float overlapY = (playerBounds.height/2 + wall.height/2) - std::abs(dy);
+
+            // If overlap in Y is smaller, it's a vertical collision (floor/ceiling)
+            if (overlapY < overlapX) {
+                // If player is above the wall center, push UP
+                if (dy < 0) {
+                    player->setPosition(pPos.x, pPos.y - overlapY);
+                } else {
+                    player->setPosition(pPos.x, pPos.y + overlapY);
+                }
             } else {
-                player->setPosition(pPos.x, pPos.y + (dy > 0 ? 2.0f : -2.0f));
+                // Horizontal collision (Walls)
+                if (dx < 0) {
+                    player->setPosition(pPos.x - overlapX, pPos.y);
+                } else {
+                    player->setPosition(pPos.x + overlapX, pPos.y);
+                }
             }
         }
     }

@@ -8,30 +8,24 @@
 #include "ShockManager.cpp"
 #include "Platform.h"
 
+// Define Game States
+enum GameState {
+    STATE_MENU,
+    STATE_CONTROLS,
+    STATE_PLAYING,
+    STATE_GAME_OVER
+};
+
 class Game {
 private:
     sf::RenderWindow window;
+    
     Player* player1;
     Player* player2;
     CollisionManager collisionManager;
-    ShockManager shockManager;
-    
-    sf::Texture platformTexture;
-    std::vector<Platform> platforms;
+   
+    ShockManager shockManager{"/dev/ttyACM0"};
 
-    sf::Texture bgTexture;
-    sf::Sprite bgSprite;
-
-    void processEvents();
-    void update(sf::Time dt);
-    void draw();
-    void drawHUD(); // New Function for Top-of-screen bars
-    void checkVictory();
-    Player* player1;
-    Player* player2;
-    CollisionManager collisionManager;
-    ShockManager shockManager;
-    
     sf::Texture platformTexture;
     std::vector<Platform> platforms;
 
@@ -50,8 +44,14 @@ private:
 
     // Controls Elements
     sf::Text controlsTitle;
-    sf::Text controlsContent; // The big block of text
+    sf::Text controlsContent; 
     sf::Text backButton;
+
+    // Game Over Elements
+    sf::Text gameOverTitle;
+    sf::Text winnerText;
+    sf::Text restartButton;
+    sf::Text quitButton;
 
     // Helpers
     void initUI();
@@ -64,9 +64,10 @@ private:
     void drawControls();
     void drawHUD(); 
     void drawGame();
+    void drawGameOver(); 
 
     void checkVictory();
-    void resetGame(); // Helper to restart
+    void resetGame(); 
 
 public:
     Game();

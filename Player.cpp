@@ -12,8 +12,34 @@ Player::Player(float x, float y, sf::Color color, int id) {
 
     if (img.loadFromFile(filename)) {
         loaded = true;
-        img.createMaskFromColor(sf::Color::White);
+
+        // --- SMART BACKGROUND REMOVAL (Restored) ---
+        // 1. Detect background color from top-left pixel
+        sf::Color bgColor = img.getPixel(0, 0);
+        int threshold = 50; // Tolerance for "dirty" background pixels
+
+        for (unsigned int i = 0; i < img.getSize().x; ++i) {
+            for (unsigned int j = 0; j < img.getSize().y; ++j) {
+                sf::Color pixel = img.getPixel(i, j);
+
+                // Calculate difference from background color
+                int diffR = std::abs((int)pixel.r - (int)bgColor.r);
+                int diffG = std::abs((int)pixel.g - (int)bgColor.g);
+                int diffB = std::abs((int)pixel.b - (int)bgColor.b);
+
+                bool isBackground = (diffR < threshold && diffG < threshold && diffB < threshold);
+                
+                // Also catch bright white/grey artifacts (grid lines)
+                bool isArtifact = (pixel.r > 200 && pixel.g > 200 && pixel.b > 200);
+
+                if (isBackground || isArtifact) {
+                    img.setPixel(i, j, sf::Color::Transparent);
+                }
+            }
+        }
+
         texture.loadFromImage(img);
+        texture.setSmooth(false); // Keep pixel art sharp
     } else {
         std::cerr << "Error loading " << filename << std::endl;
         texture.create(40, 60);
@@ -24,15 +50,17 @@ Player::Player(float x, float y, sf::Color color, int id) {
 
     sprite.setTexture(texture);
     
+    // Dynamic Scaling logic (Keep this to prevent "Massive Sprite" issue)
     float targetHeight = 100.0f; 
     float currentHeight = (float)texture.getSize().y;
-    float scaleFactor = targetHeight / currentHeight;
+    float scaleFactor = (currentHeight > 0) ? targetHeight / currentHeight : 1.0f;
 
     sf::FloatRect bounds = sprite.getLocalBounds();
     sprite.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
     
     sprite.setPosition(x, y);
 
+    // Flipping Logic
     if (playerId == 2) {
         sprite.setScale(-scaleFactor, scaleFactor); 
     } else {
@@ -62,9 +90,12 @@ void Player::handleInput(sf::Event event) {
         int lightKey = (playerId == 1) ? sf::Keyboard::Num3 : sf::Keyboard::P;
         int castKey = (playerId == 1) ? sf::Keyboard::Space : sf::Keyboard::Enter;
 
-        if (event.key.code == fireKey) elementQueue.push_back(FIRE);
-        if (event.key.code == waterKey) elementQueue.push_back(WATER);
-        if (event.key.code == lightKey) elementQueue.push_back(LIGHTNING);
+        // Queue Limit (Max 3)
+        if (elementQueue.size() < 3) {
+            if (event.key.code == fireKey) elementQueue.push_back(FIRE);
+            if (event.key.code == waterKey) elementQueue.push_back(WATER);
+            if (event.key.code == lightKey) elementQueue.push_back(LIGHTNING);
+        }
         
         if (event.key.code == castKey) {
             castSpell();
@@ -81,8 +112,7 @@ void Player::castSpell() {
 
     sf::Vector2f dir = (playerId == 1) ? sf::Vector2f(1.f, 0.f) : sf::Vector2f(-1.f, 0.f);
     
-    // --- FIX IS HERE ---
-    // Increased offset from 45.f to 80.f so projectile spawns OUTSIDE the hitbox
+    // Spawn offset 80.f to avoid self-hit
     sf::Vector2f spawnPos = sprite.getPosition() + (dir * 80.f); 
 
     if (elementQueue.size() == 3 && 
@@ -186,11 +216,15 @@ void Player::update(sf::Time dt) {
         sprite.move(movement * currentSpeed * dtSec);
     }
 
+    // --- BOUNDARY CHECK (UPDATED) ---
     sf::Vector2f pos = sprite.getPosition();
     if (pos.x < 20.f) pos.x = 20.f;
     if (pos.x > 780.f) pos.x = 780.f;
     if (pos.y < 30.f) pos.y = 30.f;
-    if (pos.y > 570.f) pos.y = 570.f;
+    
+    // FIX: Set to 550.f so Feet (y+50) touch 600.f
+    if (pos.y > 550.f) pos.y = 550.f;
+    
     sprite.setPosition(pos);
 
     if (mp < maxMp) mp += 5.f * dtSec;
@@ -227,18 +261,20 @@ void Player::applyStatusEffect(SpellEffect effect) {
 }
 
 void Player::draw(sf::RenderWindow& window) {
+    // Status Visuals
     if (stunTimer > 0) sprite.setColor(sf::Color(100, 100, 100)); 
     else if (burnTimer > 0) sprite.setColor(sf::Color(255, 100, 100)); 
     else if (slowTimer > 0) sprite.setColor(sf::Color(150, 255, 255)); 
     else sprite.setColor(sf::Color::White); 
 
+    // Shield (Thick Outline)
     if (shieldHP > 0) {
-        sf::CircleShape shield(40.f);
-        shield.setOrigin(40.f, 40.f);
+        sf::CircleShape shield(45.f);
+        shield.setOrigin(45.f, 45.f);
         shield.setPosition(sprite.getPosition());
-        shield.setFillColor(sf::Color(255, 255, 255, 50)); 
+        shield.setFillColor(sf::Color(255, 255, 255, 80)); 
         shield.setOutlineColor(sf::Color::White);
-        shield.setOutlineThickness(2.f);
+        shield.setOutlineThickness(5.f); 
         window.draw(shield);
     }
 
@@ -266,6 +302,8 @@ float Player::getMaxHP() const { return maxHp; }
 float Player::getMP() const { return mp; }
 float Player::getMaxMP() const { return maxMp; }
 float Player::getShieldHP() const { return shieldHP; }
+int Player::getPlayerId() const { return playerId; }
+
 sf::FloatRect Player::getBounds() const { return sprite.getGlobalBounds(); }
 std::vector<Spell>& Player::getSpells() { return activeSpells; }
 void Player::setPosition(float x, float y) { sprite.setPosition(x, y); }
