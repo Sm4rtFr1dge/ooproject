@@ -47,7 +47,7 @@ void CollisionManager::checkEnvironment(Player* player, const std::vector<Platfo
     }
 }
 
-// --- NEW: Player vs Player Body Blocking ---
+// --- Player vs Player Body Blocking ---
 void CollisionManager::checkPlayerCollision(Player* p1, Player* p2) {
     sf::FloatRect b1 = p1->getBounds();
     sf::FloatRect b2 = p2->getBounds();
@@ -63,7 +63,7 @@ void CollisionManager::checkPlayerCollision(Player* p1, Player* p2) {
         float overlapX = (b1.width / 2 + b2.width / 2) - std::abs(dx);
         float overlapY = (b1.height / 2 + b2.height / 2) - std::abs(dy);
 
-        // Push apart on the axis with the least overlap (smoothest feel)
+        // Push apart on the axis with the least overlap 
         if (overlapX < overlapY) {
             float push = overlapX / 2.0f;
             if (dx > 0) { // P1 is to the right of P2

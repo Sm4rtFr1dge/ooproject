@@ -13,7 +13,7 @@ public:
     // Players vs Environment (Walls/Floor)
     void checkEnvironment(Player* player, const std::vector<Platform>& platforms);
 
-    // NEW: Player vs Player (Body blocking)
+    // Player vs Player (Body blocking)
     void checkPlayerCollision(Player* p1, Player* p2);
 };
 

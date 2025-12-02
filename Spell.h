@@ -19,7 +19,7 @@ private:
     float damage;
     bool active;
     SpellEffect effectType;
-    float lifetime; // NEW: Spells die after a while to prevent lag
+    float lifetime; // Spells die after a while to prevent lag
 
 public:
     Spell(float startX, float startY, sf::Vector2f dir, sf::Color color, float dmg, SpellEffect effect);

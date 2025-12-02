@@ -20,7 +20,7 @@ void Spell::update(sf::Time dt) {
     // 1. Move
     shape.move(velocity * dt.asSeconds());
 
-    // 2. Screen Wrapping (Pac-Man Style)
+    // 2. Screen Wrapping 
     sf::Vector2f pos = shape.getPosition();
     bool wrapped = false;
 
@@ -47,7 +47,7 @@ void Spell::update(sf::Time dt) {
     }
 
     // 3. Lifetime Management
-    // Even wrapping spells should eventually fade so the game doesn't crash from too many objects
+    // Wrapped spells should eventually fade so the game doesn't crash from too many objects
     lifetime -= dt.asSeconds();
     if (lifetime <= 0) {
         active = false;

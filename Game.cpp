@@ -44,7 +44,6 @@ const std::string crtFragmentShader = R"(
     }
 )";
 
-// FIX IS HERE: Added ", shockManager("/dev/ttyACM0")" to the initializer list
 Game::Game() : window(sf::VideoMode(800, 600), "Fight Club: Elemental Combat"), shockManager("/dev/ttyACM0") {
     window.setFramerateLimit(60);
     currentState = STATE_MENU;
@@ -88,9 +87,9 @@ Game::Game() : window(sf::VideoMode(800, 600), "Fight Club: Elemental Combat"), 
 
     // --- LEVEL PLATFORMS ---
     // Only keeping the top platform and the floor
-    platforms.emplace_back(platformTexture, 350.f, 50.f, 100.f, 50.f);
+    // platforms.emplace_back(platformTexture, 350.f, 50.f, 100.f, 50.f);
     
-    // REMOVED MIDDLE BOTTOM BLOCK as requested
+    // REMOVED MIDDLE BOTTOM BLOCK
     // platforms.emplace_back(platformTexture, 350.f, 500.f, 100.f, 50.f);
     
     // The Floor (y=580, height=20)
@@ -118,7 +117,23 @@ void Game::initUI() {
     setupText(exitButton, "EXIT", 40, 400, 450);
 
     setupText(controlsTitle, "INSTRUCTIONS", 50, 400, 50);
-    setupText(controlsContent, "P1: WASD, Space\nP2: Arrows, Enter", 20, 400, 300);
+
+    setupText(controlsContent, 
+                "PLAYER 1 (Yellow):\n"
+                "Move: W A S D\n"
+                "Elements: 1 (Fire), 2 (Water), 3 (Lightning)\n"
+                "Cast: SPACE\n\n"
+                "PLAYER 2 (Blue):\n"
+                "Move: Arrows\n"
+                "Elements: I (Fire), O (Water), P (Lightning)\n"
+                "Cast: ENTER\n\n"
+                "COMBOS:\n"
+                "- Fire + Water: SHIELD (Blocks dmg)\n"
+                "- Fire + Lightning: TELEPORT UP\n"
+                "- Water + Lightning: SLOW ENEMY\n"
+                "- Fire + Water + Lightning: ULTIMATE STUN", 
+                20, 400, 300);
+
     setupText(backButton, "BACK TO MENU", 30, 400, 550);
 
     setupText(gameOverTitle, "GAME OVER", 60, 400, 150);
@@ -206,7 +221,7 @@ void Game::update(sf::Time dt) {
         collisionManager.checkEnvironment(player1, platforms);
         collisionManager.checkEnvironment(player2, platforms);
 
-        // --- NEW: Player-to-Player Collision Check ---
+        // --- Player-to-Player Collision Check ---
         collisionManager.checkPlayerCollision(player1, player2);
 
         checkVictory();

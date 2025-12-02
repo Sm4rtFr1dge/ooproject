@@ -13,7 +13,6 @@ Player::Player(float x, float y, sf::Color color, int id) {
     if (img.loadFromFile(filename)) {
         loaded = true;
 
-        // --- SMART BACKGROUND REMOVAL (Restored) ---
         // 1. Detect background color from top-left pixel
         sf::Color bgColor = img.getPixel(0, 0);
         int threshold = 50; // Tolerance for "dirty" background pixels
@@ -216,7 +215,7 @@ void Player::update(sf::Time dt) {
         sprite.move(movement * currentSpeed * dtSec);
     }
 
-    // --- BOUNDARY CHECK (UPDATED) ---
+    // --- BOUNDARY CHECK ---
     sf::Vector2f pos = sprite.getPosition();
     if (pos.x < 20.f) pos.x = 20.f;
     if (pos.x > 780.f) pos.x = 780.f;
