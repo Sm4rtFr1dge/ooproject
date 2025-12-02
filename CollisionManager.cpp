@@ -1,5 +1,5 @@
 #include "CollisionManager.h"
-#include <iostream>
+#include <cmath> // For std::abs
 
 bool CollisionManager::checkHits(Player* attacker, Player* victim) {
     std::vector<Spell>& spells = attacker->getSpells();
@@ -8,12 +8,8 @@ bool CollisionManager::checkHits(Player* attacker, Player* victim) {
     for (auto& spell : spells) {
         if (spell.isActive()) {
             if (spell.getBounds().intersects(victim->getBounds())) {
-                // 1. Deal Damage
                 victim->takeDamage(spell.getDamage());
-
-                // 2. Apply Status Effect
-                victim->applyStatusEffect(spell.getEffect());
-
+                victim->applyStatusEffect(spell.getEffect()); // Apply burn/stun
                 spell.deactivate();
                 hitDetected = true;
             }
@@ -35,36 +31,56 @@ void CollisionManager::checkEnvironment(Player* player, const std::vector<Platfo
             float dx = pPos.x - wallCenterX;
             float dy = pPos.y - wallCenterY;
 
-            // --- FIX FOR SLIDING FLOORS ---
             // Calculate overlap amounts
             float overlapX = (playerBounds.width/2 + wall.width/2) - std::abs(dx);
             float overlapY = (playerBounds.height/2 + wall.height/2) - std::abs(dy);
 
-            // If overlap in Y is smaller, it's a vertical collision (floor/ceiling)
+            // Resolve on the shallowest axis
             if (overlapY < overlapX) {
-                // If player is above the wall center, push UP
-                if (dy < 0) {
-                    player->setPosition(pPos.x, pPos.y - overlapY);
-                } else {
-                    player->setPosition(pPos.x, pPos.y + overlapY);
-                }
+                if (dy < 0) player->setPosition(pPos.x, pPos.y - overlapY);
+                else player->setPosition(pPos.x, pPos.y + overlapY);
             } else {
-                // Horizontal collision (Walls)
-                if (dx < 0) {
-                    player->setPosition(pPos.x - overlapX, pPos.y);
-                } else {
-                    player->setPosition(pPos.x + overlapX, pPos.y);
-                }
+                if (dx < 0) player->setPosition(pPos.x - overlapX, pPos.y);
+                else player->setPosition(pPos.x + overlapX, pPos.y);
             }
         }
     }
+}
 
-    for (auto& spell : player->getSpells()) {
-        if (spell.isActive()) {
-            for (const auto& platform : platforms) {
-                if (spell.getBounds().intersects(platform.getBounds())) {
-                    spell.deactivate(); 
-                }
+// --- NEW: Player vs Player Body Blocking ---
+void CollisionManager::checkPlayerCollision(Player* p1, Player* p2) {
+    sf::FloatRect b1 = p1->getBounds();
+    sf::FloatRect b2 = p2->getBounds();
+
+    if (b1.intersects(b2)) {
+        sf::Vector2f pos1 = p1->getPosition();
+        sf::Vector2f pos2 = p2->getPosition();
+
+        float dx = pos1.x - pos2.x;
+        float dy = pos1.y - pos2.y;
+
+        // Calculate overlap
+        float overlapX = (b1.width / 2 + b2.width / 2) - std::abs(dx);
+        float overlapY = (b1.height / 2 + b2.height / 2) - std::abs(dy);
+
+        // Push apart on the axis with the least overlap (smoothest feel)
+        if (overlapX < overlapY) {
+            float push = overlapX / 2.0f;
+            if (dx > 0) { // P1 is to the right of P2
+                p1->setPosition(pos1.x + push, pos1.y);
+                p2->setPosition(pos2.x - push, pos2.y);
+            } else {      // P1 is to the left
+                p1->setPosition(pos1.x - push, pos1.y);
+                p2->setPosition(pos2.x + push, pos2.y);
+            }
+        } else {
+            float push = overlapY / 2.0f;
+            if (dy > 0) { // P1 is below P2
+                p1->setPosition(pos1.x, pos1.y + push);
+                p2->setPosition(pos2.x, pos2.y - push);
+            } else {      // P1 is above P2
+                p1->setPosition(pos1.x, pos1.y - push);
+                p2->setPosition(pos2.x, pos2.y + push);
             }
         }
     }
