@@ -105,6 +105,7 @@ The project follows object-oriented design principles:
 - **CollisionManager**: Detects hits and environment collisions
 - **Platform**: Static environment obstacles
 - **ShockManager**: Hardware feedback integration
+  
   <img width="1061" height="1079" alt="Uml_final" src="https://github.com/user-attachments/assets/03dd524a-deb5-4098-8fc3-b6b7e61dc85d" />
 
 **Enjoy the battle! May the best elemental mage win!** ⚔️✨
