@@ -108,4 +108,31 @@ The project follows object-oriented design principles:
   
   <img width="1061" height="1079" alt="Uml_final" src="https://github.com/user-attachments/assets/03dd524a-deb5-4098-8fc3-b6b7e61dc85d" />
 
+## ARDUINO TUTORIAL
+Since this was designed to run on linux, WSL in particular, certain steps need to be taken to allow WSL to connect to the host device's serial ports since WSL is a subsystem.
+
+First of all you have to download and install usbipd on your windows system if you don't already have it
+You can download it here: https://github.com/dorssel/usbipd-win
+
+Once installed, open powershell as administrator and type the following command with your arduino connected to your device: 
+ ```usbipd list```
+You will see a list of devices, find your arduino in the list (it will generally be labelled 'Usb Input Device' with its serial port written beside it in parenthesis eg: Usb Input Device (COM3) note down the the name of the serial port as it will be used later on). Once you've found the arduino, note down it's BUSID written on the left, it will be something like '2-1'.
+Now execute the command
+```usbipd attacth --busid <your busid> --wsl```
+
+Finally, search up the linux equivalent of your serial port (COM3 is /dev/ttyACM0), and replace it in Game.h where ShockManager is being initialized.
+
+Your arduino is now connected to your code and will work accordingly.
+
+To disconnect your arduino from WSL, run the following command on powershell: 
+```usbipd detach --busid <your busid>```
+
+## Hardware Details
+<img width="" height="" alt="Torture_Device" src="./Torture Device.png" />
+Assume the potato is a high voltage output device. In our case, we extracted it from the inner circuitry of a mosquito killing raquet. The input of the high voltage output device is controlled by the arduino through a transistor. The ground of the potato output is taped to the players directly. The live output of the potato is taped to the heads of the servo motors which are in turn taped to the players. When a player is hit, the potato is given power, charging its capacitor, once charged, the relevant servo is activated, bringing the live in contact with the player, completing the circuit and discharging high voltage to provide an electrical shock.
+
+**It is recommended you use an external power supply instead of the arduino board for power**
+
+You can strip a 5v mobile charger and use it as a portable power supply
+
 **Enjoy the battle! May the best elemental mage win!** ⚔️✨
