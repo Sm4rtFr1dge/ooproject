@@ -135,4 +135,10 @@ Assume the potato is a high voltage output device. In our case, we extracted it 
 
 You can strip a 5v mobile charger and use it as a portable power supply
 
+## Running the game
+Finally, you can compile the game on WSL using the command: ```g++ main.cpp CollisionManager.cpp Game.cpp Platform.cpp Player.cpp ShockManager.cpp Spell.cpp -o FightClub -lsfml-graphics -lsfml-window -lsfml-system```
+
+And run it using ```./FightClub```
+
 **Enjoy the battle! May the best elemental mage win!** ⚔️✨
+
