@@ -185,6 +185,8 @@ void Game::update(sf::Time dt) {
         collisionManager.checkEnvironment(player1, platforms);
         collisionManager.checkEnvironment(player2, platforms);
 
+        collisionManager.checkPlayerCollision(player1, player2);
+
         checkVictory();
     }
 }
@@ -280,3 +282,4 @@ void Game::checkVictory() {
         currentState = STATE_GAME_OVER;
     }
 }
+
